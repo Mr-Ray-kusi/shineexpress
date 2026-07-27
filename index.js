@@ -147,15 +147,23 @@
    });
  }
 
- function updateBookingSteps() {
-   const hasService = !!bookingService.value;
-   const hasDetails = document.getElementById('bookingName')?.value.trim() && document.getElementById('bookingEmail')?.value.trim();
-   const hasSchedule = document.getElementById('bookingDate')?.value && document.getElementById('bookingTime')?.value;
-   bookingSteps.forEach((step, index) => {
-     const active = (index === 0 && hasService) || (index === 1 && hasDetails) || (index === 2 && hasSchedule);
-     step.classList.toggle('active', active);
-   });
- }
+  function updateBookingSteps() {
+    const hasService = !!bookingService.value;
+    const nameOk = !!document.getElementById('bookingName')?.value.trim();
+    const emailOk = !!document.getElementById('bookingEmail')?.value.trim();
+    const addressOk = !!document.getElementById('bookingAddress')?.value.trim();
+    const hasDetails = nameOk && emailOk && addressOk;
+    const hasSchedule = !!document.getElementById('bookingDate')?.value && !!document.getElementById('bookingTime')?.value;
+
+    let current = 0;
+    if (hasService) current = 1;
+    if (hasService && hasDetails) current = 2;
+
+    bookingSteps.forEach((step, index) => {
+      step.classList.toggle('active', index === current);
+      step.classList.toggle('done', index < current || (index === 2 && hasSchedule));
+    });
+  }
 
  serviceCards.forEach(card => {
    card.addEventListener('click', () => {
@@ -166,7 +174,7 @@
    });
  });
 
- ['bookingName', 'bookingEmail', 'bookingDate', 'bookingTime'].forEach(id => {
+ ['bookingName', 'bookingEmail', 'bookingAddress', 'bookingDate', 'bookingTime'].forEach(id => {
    document.getElementById(id)?.addEventListener('input', updateBookingSteps);
  });
 
@@ -230,8 +238,8 @@
 
    const originalText = bookingSubmitBtn.textContent;
    bookingSubmitBtn.disabled = true;
-   bookingSubmitBtn.textContent = 'Sending…';
-   bookingFormNote.textContent = 'Sending your booking…';
+   bookingSubmitBtn.textContent = 'Sending...';
+   bookingFormNote.textContent = 'Sending your booking...';
    bookingFormNote.style.color = '';
 
    try {
@@ -259,7 +267,7 @@
        bookingFormNote.style.color = '#c0392b';
      }
    } catch {
-     bookingFormNote.textContent = 'Sending via Formspree…';
+     bookingFormNote.textContent = 'Sending via Formspree...';
      bookingForm.removeEventListener('submit', handleBookingSubmit);
      HTMLFormElement.prototype.submit.call(bookingForm);
      return;
