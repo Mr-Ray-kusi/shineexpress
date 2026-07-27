@@ -797,8 +797,21 @@
     .footer-top{grid-template-columns:1fr 1fr;row-gap:2.4rem;}
   }
   @media (max-width:760px){
+    header{padding:16px max(4vw, 14px);}
+    header.scrolled{padding:12px max(4vw, 14px);}
     nav.links{display:none;}
-    .burger{display:flex;}
+    .burger{
+      display:flex;
+      margin-right:6px;
+      padding:6px 2px 6px 6px;
+      flex-shrink:0;
+    }
+    .nav-cta{gap:.55rem;}
+    .nav-cta .btn-primary{
+      padding:.55em .95em;
+      font-size:.72rem;
+      letter-spacing:0;
+    }
     .hero-panel{padding:2rem 5vw 3rem;}
     .hero-visual{min-height:280px;}
     .hero h1{
@@ -973,6 +986,7 @@
   .booking-form-grid{
     display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;
   }
+  .booking-form-grid > label{min-width:0;}
   .booking-form-grid .field-full{grid-column:1 / -1;}
   .booking-panel label{
     display:block;font-size:.78rem;font-weight:600;
@@ -982,11 +996,32 @@
   .booking-panel input,
   .booking-panel select,
   .booking-panel textarea{
-    width:100%;padding:.9rem 1rem;border-radius:12px;
+    width:100%;max-width:100%;padding:.9rem 1rem;border-radius:12px;
     border:1.5px solid rgba(14,59,54,.14);
     font:inherit;font-size:.92rem;color:var(--ink);
     background:var(--ivory);margin-top:.45rem;
     transition:border-color .25s ease, box-shadow .25s ease, background .25s ease;
+  }
+  .booking-panel input[type="text"],
+  .booking-panel input[type="email"],
+  .booking-panel input[type="date"],
+  .booking-panel input[type="time"]{
+    display:block;
+    height:3.2rem;
+    min-height:3.2rem;
+    line-height:1.25;
+    padding:.75rem 1rem;
+  }
+  .booking-panel input[type="date"],
+  .booking-panel input[type="time"]{
+    appearance:none;
+    -webkit-appearance:none;
+    color-scheme:light;
+  }
+  .booking-panel input[type="date"]::-webkit-calendar-picker-indicator,
+  .booking-panel input[type="time"]::-webkit-calendar-picker-indicator{
+    opacity:.55;
+    cursor:pointer;
   }
   .booking-panel input:focus,
   .booking-panel select:focus,
