@@ -179,6 +179,12 @@
    control.addEventListener('click', closeBookingModal);
  });
 
+ document.addEventListener('keydown', (event) => {
+   if (event.key === 'Escape' && bookingModal.classList.contains('open')) {
+     closeBookingModal();
+   }
+ });
+
  bookingService.addEventListener('change', () => {
    if (bookingService.value === 'Other') {
      otherServiceWrap.classList.remove('hidden');
