@@ -116,15 +116,22 @@
     border-bottom-color:rgba(246,243,236,.1);
   }
   header:not(.scrolled) .logo,
-  header:not(.scrolled) nav.links a,
+  header:not(.scrolled) nav.links:not(.open) a,
   header:not(.scrolled) .nav-phone a{color:var(--text-light);}
-  header:not(.scrolled) nav.links a::after{background:var(--lime);}
+  header:not(.scrolled) nav.links:not(.open) a::after{background:var(--lime);}
   header:not(.scrolled) .burger span{background:var(--text-light);}
   header:not(.scrolled) .btn-primary{
     background:var(--lime);
     color:var(--ink);
   }
   header:not(.scrolled) .nav-phone{color:rgba(246,243,236,.72);}
+  /* Open mobile menu must stay readable over the ivory panel even on the hero */
+  header:not(.scrolled) nav.links.open a,
+  header.scrolled nav.links.open a,
+  nav.links.open a{color:var(--ink);}
+  header:not(.scrolled) nav.links.open a::after,
+  header.scrolled nav.links.open a::after,
+  nav.links.open a::after{background:var(--ink);}
   header.scrolled{
     padding:14px min(6vw,80px);
     background:rgba(246,243,236,.78);
@@ -835,20 +842,28 @@
     nav.links{
       display:none;
       position:fixed;
-      top:70px;
+      top:66px;
       left:16px;
       right:16px;
-      z-index:1001;
+      z-index:1002;
       background:var(--ivory);
       border-radius:20px;
-      padding:20px;
+      padding:18px 20px;
       flex-direction:column;
-      gap:1.2rem;
+      gap:1.1rem;
       box-shadow:0 20px 50px -20px rgba(14,59,54,.4);
     }
     nav.links.open{display:flex;}
-    nav.links.open a{color:var(--ink);}
-    nav.links.open a::after{background:var(--ink);}
+    nav.links.open a,
+    header:not(.scrolled) nav.links.open a{
+      color:var(--ink) !important;
+      opacity:1;
+      visibility:visible;
+    }
+    nav.links.open a::after,
+    header:not(.scrolled) nav.links.open a::after{
+      background:var(--ink) !important;
+    }
     .nav-phone{display:none;}
     .nav-cta{
       margin-left:auto;
@@ -861,16 +876,23 @@
     .burger{
       display:flex;
       margin:0;
-      padding:8px 4px;
+      padding:0;
+      width:40px;
+      height:40px;
       flex-shrink:0;
       align-items:center;
       justify-content:center;
+      gap:5px;
     }
     .nav-cta .btn-primary{
-      padding:.58em 1em;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height:40px;
+      padding:0 1em;
       font-size:.78rem;
       letter-spacing:0;
-      line-height:1.1;
+      line-height:1;
       white-space:nowrap;
     }
     .hero{
