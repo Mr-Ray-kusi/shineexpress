@@ -951,8 +951,7 @@
     .gallery-ba-pair figure{aspect-ratio:1 / 1;}
     .section-head{flex-direction:column;align-items:flex-start;}
     .footer-top{grid-template-columns:1fr;}
-    .footer-brand .logo,
-    .footer-brand > p{display:none;}
+    .footer-brand{display:none;}
     .cta-banner{margin:0 4vw;}
     .reveal-layout{grid-template-columns:1fr;}
     .reveal-copy h2{max-width:none;}
