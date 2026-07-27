@@ -163,8 +163,9 @@
     const hasService = !!bookingService.value;
     const nameOk = !!document.getElementById('bookingName')?.value.trim();
     const emailOk = !!document.getElementById('bookingEmail')?.value.trim();
+    const phoneOk = !!document.getElementById('bookingPhone')?.value.trim();
     const addressOk = !!document.getElementById('bookingAddress')?.value.trim();
-    const hasDetails = nameOk && emailOk && addressOk;
+    const hasDetails = nameOk && emailOk && phoneOk && addressOk;
     const hasSchedule = !!document.getElementById('bookingDate')?.value && !!document.getElementById('bookingTime')?.value;
 
     let current = 0;
@@ -186,7 +187,7 @@
    });
  });
 
- ['bookingName', 'bookingEmail', 'bookingAddress', 'bookingDate', 'bookingTime'].forEach(id => {
+ ['bookingName', 'bookingEmail', 'bookingPhone', 'bookingAddress', 'bookingDate', 'bookingTime'].forEach(id => {
    document.getElementById(id)?.addEventListener('input', updateBookingSteps);
  });
 
@@ -194,7 +195,7 @@
    bookingModal.classList.add('open');
    bookingModal.setAttribute('aria-hidden', 'false');
    document.body.style.overflow = 'hidden';
-   bookingFormNote.textContent = 'No payment required now — we\'ll confirm availability and pricing by email.';
+   bookingFormNote.textContent = 'No payment required now  we\'ll confirm availability and pricing by email.';
    bookingFormNote.style.color = '';
  }
 
@@ -260,6 +261,7 @@
 
    const nameInput = document.getElementById('bookingName');
    const emailInput = document.getElementById('bookingEmail');
+   const phoneInput = document.getElementById('bookingPhone');
    const addressInput = document.getElementById('bookingAddress');
    const dateInput = document.getElementById('bookingDate');
    const timeInput = document.getElementById('bookingTime');
@@ -280,6 +282,10 @@
      showBookingError('Please enter a valid email address.', emailInput);
      return;
    }
+   if (!phoneInput.value.trim()) {
+     showBookingError('Please enter your phone number.', phoneInput);
+     return;
+   }
    if (!addressInput.value.trim()) {
      showBookingError('Please enter your address.', addressInput);
      return;
@@ -298,7 +304,7 @@
    const otherService = (formData.get('otherService') || '').trim();
    const serviceLabel = service === 'Other' ? (otherService || 'Other') : service;
    formData.set('service', serviceLabel);
-   document.getElementById('bookingSubject').value = `ShineExpress booking from ${formData.get('name')}`;
+   document.getElementById('bookingSubject').value = `ShineExpress Apartment Cleaning booking from ${formData.get('name')}`;
 
    const originalText = bookingSubmitBtn.textContent;
    bookingSubmitBtn.disabled = true;
@@ -323,7 +329,7 @@
        otherServiceWrap.classList.add('hidden');
        otherServiceInput.required = false;
        updateBookingSteps();
-       bookingFormNote.textContent = 'Booking sent! ShineExpress will confirm your visit by email.';
+       bookingFormNote.textContent = 'Booking sent! ShineExpress Apartment Cleaning will confirm your visit by email.';
        bookingFormNote.style.color = 'var(--ink)';
      } else {
        const data = await response.json().catch(() => ({}));
