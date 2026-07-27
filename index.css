@@ -649,9 +649,6 @@
     transition:transform .8s var(--ease);
   }
   .gallery-ba-card:hover img{transform:scale(1.06);}
-  .gallery-ba-pair img.gallery-before{
-    filter:grayscale(.45) brightness(.68) contrast(.88) saturate(.55);
-  }
   .gallery-ba-pair figcaption{
     position:absolute;
     left:.65rem;
@@ -799,7 +796,23 @@
   @media (max-width:760px){
     header{padding:16px max(4vw, 14px);}
     header.scrolled{padding:12px max(4vw, 14px);}
-    nav.links{display:none;}
+    nav.links{
+      display:none;
+      position:fixed;
+      top:78px;
+      left:16px;
+      right:16px;
+      z-index:1001;
+      background:var(--ivory);
+      border-radius:20px;
+      padding:20px;
+      flex-direction:column;
+      gap:1.2rem;
+      box-shadow:0 20px 50px -20px rgba(14,59,54,.4);
+    }
+    nav.links.open{display:flex;}
+    nav.links.open a{color:var(--ink);}
+    nav.links.open a::after{background:var(--ink);}
     .burger{
       display:flex;
       margin-right:6px;
