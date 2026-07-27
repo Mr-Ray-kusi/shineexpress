@@ -498,7 +498,7 @@
       <div class="booking-main-header">
         <p>Complete the form below. When you submit, your booking is sent directly to <strong>shineexpressfi@gmail.com</strong>.</p>
       </div>
-      <form id="bookingForm" action="https://formspree.io/f/mykqogoq" method="POST">
+      <form id="bookingForm" action="https://formspree.io/f/mykqogoq" method="POST" novalidate>
         <input type="hidden" name="_subject" id="bookingSubject" value="ShineExpress free quote request">
         <p class="booking-section-title">Select a service</p>
         <div class="booking-services" id="bookingServices">
@@ -539,7 +539,7 @@
           </button>
         </div>
         <label class="booking-select-hidden" for="bookingService">Service</label>
-        <select id="bookingService" name="service" class="booking-select-hidden" required tabindex="-1" aria-hidden="true">
+        <select id="bookingService" name="service" class="booking-select-hidden" tabindex="-1" aria-hidden="true">
           <option value="" disabled selected>Select one</option>
           <option value="Move-out Cleaning">Move-out Cleaning</option>
           <option value="Move-in Cleaning">Move-in Cleaning</option>

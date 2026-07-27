@@ -1,3 +1,15 @@
+ // ===== Always land on hero after refresh =====
+ if ('scrollRestoration' in history) {
+   history.scrollRestoration = 'manual';
+ }
+ if (location.hash) {
+   history.replaceState(null, '', location.pathname + location.search);
+ }
+ window.scrollTo(0, 0);
+ window.addEventListener('load', () => {
+   window.scrollTo(0, 0);
+ });
+
  // ===== Header scroll state =====
  const header = document.getElementById('siteHeader');
  window.addEventListener('scroll', () => {
@@ -182,12 +194,15 @@
    bookingModal.classList.add('open');
    bookingModal.setAttribute('aria-hidden', 'false');
    document.body.style.overflow = 'hidden';
+   bookingFormNote.textContent = 'No payment required now — we\'ll confirm availability and pricing by email.';
+   bookingFormNote.style.color = '';
  }
 
  function closeBookingModal() {
    bookingModal.classList.remove('open');
    bookingModal.setAttribute('aria-hidden', 'true');
    document.body.style.overflow = '';
+   bookingSubmitBtn.disabled = false;
  }
 
  bookingButtons.forEach(button => {
@@ -198,7 +213,10 @@
  });
 
  [bookingBackdrop, bookingClose, bookingCancel].forEach(control => {
-   control.addEventListener('click', closeBookingModal);
+   control.addEventListener('click', (event) => {
+     event.preventDefault();
+     closeBookingModal();
+   });
  });
 
  document.addEventListener('keydown', (event) => {
@@ -221,13 +239,59 @@
 
  bookingForm.addEventListener('submit', handleBookingSubmit);
 
+ function showBookingError(message, field) {
+   bookingFormNote.textContent = message;
+   bookingFormNote.style.color = '#c0392b';
+   const main = document.querySelector('.booking-main');
+   if (field && typeof field.focus === 'function') {
+     try { field.focus({ preventScroll: true }); } catch (_) { field.focus(); }
+     if (main) {
+       const top = field.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop - 24;
+       main.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+     }
+   } else if (main) {
+     main.scrollTo({ top: 0, behavior: 'smooth' });
+   }
+ }
+
  async function handleBookingSubmit(event) {
    event.preventDefault();
+   event.stopPropagation();
+
+   const nameInput = document.getElementById('bookingName');
+   const emailInput = document.getElementById('bookingEmail');
+   const addressInput = document.getElementById('bookingAddress');
+   const dateInput = document.getElementById('bookingDate');
+   const timeInput = document.getElementById('bookingTime');
+
    if (!bookingService.value) {
-     bookingServices.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+     showBookingError('Please choose a service first.', bookingServices);
      return;
    }
-   if (!bookingForm.reportValidity()) return;
+   if (bookingService.value === 'Other' && !otherServiceInput.value.trim()) {
+     showBookingError('Please describe the service you need.', otherServiceInput);
+     return;
+   }
+   if (!nameInput.value.trim()) {
+     showBookingError('Please enter your full name.', nameInput);
+     return;
+   }
+   if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+     showBookingError('Please enter a valid email address.', emailInput);
+     return;
+   }
+   if (!addressInput.value.trim()) {
+     showBookingError('Please enter your address.', addressInput);
+     return;
+   }
+   if (!dateInput.value) {
+     showBookingError('Please pick a preferred date.', dateInput);
+     return;
+   }
+   if (!timeInput.value) {
+     showBookingError('Please pick a preferred time.', timeInput);
+     return;
+   }
 
    const formData = new FormData(bookingForm);
    const service = formData.get('service');
@@ -267,10 +331,8 @@
        bookingFormNote.style.color = '#c0392b';
      }
    } catch {
-     bookingFormNote.textContent = 'Sending via Formspree...';
-     bookingForm.removeEventListener('submit', handleBookingSubmit);
-     HTMLFormElement.prototype.submit.call(bookingForm);
-     return;
+     bookingFormNote.textContent = 'Could not send booking. Please try again or email shineexpressfi@gmail.com.';
+     bookingFormNote.style.color = '#c0392b';
    } finally {
      bookingSubmitBtn.disabled = false;
      bookingSubmitBtn.textContent = originalText;
