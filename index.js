@@ -195,7 +195,7 @@
    bookingModal.classList.add('open');
    bookingModal.setAttribute('aria-hidden', 'false');
    document.body.style.overflow = 'hidden';
-   bookingFormNote.textContent = 'No payment required now ù we\'ll confirm availability and pricing by email.';
+   bookingFormNote.textContent = "No payment required now. We'll confirm availability and pricing by email.";
    bookingFormNote.style.color = '';
  }
 
