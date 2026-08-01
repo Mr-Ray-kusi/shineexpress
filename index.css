@@ -241,22 +241,6 @@
     object-fit:contain;
     object-position:center center;
   }
-  .hero-business-id{
-    display:none;
-    position:absolute;
-    z-index:2;
-    left:5vw;
-    top:4.75rem;
-    font-family:'Manrope',sans-serif;
-    font-size:.72rem;
-    font-weight:600;
-    letter-spacing:.03em;
-    color:rgba(246,243,236,.9);
-    margin:0;
-    padding:.4rem .7rem;
-    border-radius:8px;
-    background:rgba(7,31,28,.55);
-  }
   .scroll-cue{display:none;}
 
   /* ============ TRUST BAR ============ */
@@ -734,14 +718,16 @@
     header.scrolled{padding:10px max(4vw, 14px);}
     .logo{
       flex-shrink:1;
-      max-width:min(210px, 52vw);
+      max-width:min(240px, 58vw);
       gap:.45rem;
     }
     .logo-img{height:36px;max-width:40px;padding:2px;border-radius:8px;}
     .logo-name{font-size:.72rem;}
-    .logo-id{display:none;}
-    .hero-business-id{
+    .logo-id{
       display:block;
+      white-space:normal;
+      font-size:.55rem;
+      line-height:1.25;
     }
     nav.links{
       display:none;

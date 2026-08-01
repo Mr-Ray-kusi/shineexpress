@@ -293,10 +293,13 @@
    if (bookingTimeHint) {
      bookingTimeHint.textContent = weekend
        ? 'Weekend selected — all times are open unless already booked.'
-       : 'Weekday selected — times before 3:00 PM are unavailable. Available from 3:00 PM.';
+       : 'Weekday selected — available from 3:00 PM.';
    }
 
    TIME_SLOTS.forEach((time) => {
+     // Hide weekday morning slots entirely (before 3:00 PM)
+     if (isWeekdayBlocked(dateValue, time)) return;
+
      const button = document.createElement('button');
      button.type = 'button';
      button.className = 'booking-slot';
@@ -304,20 +307,18 @@
      button.setAttribute('role', 'option');
 
      const booked = isSlotBooked(dateValue, time);
-     const weekdayBlocked = isWeekdayBlocked(dateValue, time);
-     const unavailable = booked || weekdayBlocked;
 
      const label = document.createElement('span');
      label.textContent = formatSlotLabel(time);
      button.appendChild(label);
 
-     if (unavailable) {
+     if (booked) {
        button.disabled = true;
        button.classList.add('is-unavailable');
        button.setAttribute('aria-disabled', 'true');
        const state = document.createElement('span');
        state.className = 'slot-state';
-       state.textContent = booked ? 'Booked' : 'Unavailable';
+       state.textContent = 'Booked';
        button.appendChild(state);
      } else {
        button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
