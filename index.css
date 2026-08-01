@@ -1195,6 +1195,44 @@
   .booking-panel .form-note{
     margin-top:.85rem;font-size:.8rem;color:var(--text-mute);line-height:1.5;
   }
+  .field-hint{
+    display:block;margin-top:.35rem;font-size:.72rem;font-weight:500;
+    letter-spacing:0;text-transform:none;color:var(--text-mute);
+  }
+  .booking-time-block{margin-bottom:1rem;}
+  .booking-time-label{
+    font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--text-mute);margin:0 0 .35rem;
+  }
+  .booking-time-hint{
+    margin:0 0 .75rem;font-size:.8rem;color:var(--text-mute);line-height:1.4;
+  }
+  .booking-slots{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;
+  }
+  .booking-slot{
+    appearance:none;border:1.5px solid rgba(14,59,54,.14);background:var(--ivory);
+    color:var(--ink);border-radius:12px;padding:.7rem .4rem;font:inherit;font-size:.82rem;
+    font-weight:600;cursor:pointer;transition:border-color .2s ease, background .2s ease, color .2s ease;
+  }
+  .booking-slot:hover:not(:disabled){
+    border-color:var(--ink);background:var(--paper);
+  }
+  .booking-slot.is-selected{
+    border-color:var(--ink);background:var(--ink);color:var(--lime);
+  }
+  .booking-slot:disabled,
+  .booking-slot.is-unavailable{
+    cursor:not-allowed;opacity:.72;background:rgba(14,59,54,.06);
+    color:var(--text-mute);text-decoration:line-through;
+  }
+  .booking-slot .slot-state{
+    display:block;font-size:.65rem;font-weight:500;letter-spacing:.02em;
+    text-transform:uppercase;text-decoration:none;margin-top:.2rem;opacity:.85;
+  }
+  @media (max-width:560px){
+    .booking-slots{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
   .booking-panel .modal-close{
     position:absolute;top:16px;right:16px;z-index:3;
     width:40px;height:40px;border-radius:50%;

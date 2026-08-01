@@ -150,6 +150,100 @@
  const bookingServices = document.getElementById('bookingServices');
  const bookingFormNote = document.getElementById('bookingFormNote');
  const bookingSubmitBtn = bookingForm.querySelector('button[type="submit"]');
+ const bookingDateInput = document.getElementById('bookingDate');
+ const bookingTimeInput = document.getElementById('bookingTime');
+ const bookingSlotsEl = document.getElementById('bookingSlots');
+ const bookingTimeHint = document.getElementById('bookingTimeHint');
+ const bookingIdInput = document.getElementById('bookingId');
+
+ const BOOKED_SLOTS_KEY = 'shineexpress_booked_slots';
+ const CUSTOMER_ID_PATTERN = /^[0-9]{6}-[0-9]{3}[A-Za-z0-9]$/;
+ const WEEKDAY_OPEN_HOUR = 15; // available from 3:00 PM on weekdays
+ const TIME_SLOTS = [
+   '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+   '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+   '18:00', '19:00', '20:00'
+ ];
+
+ function slotKey(date, time) {
+   return `${date}|${time}`;
+ }
+
+ function readBookedSlots() {
+   try {
+     const raw = localStorage.getItem(BOOKED_SLOTS_KEY);
+     const parsed = raw ? JSON.parse(raw) : [];
+     return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+   } catch {
+     return [];
+   }
+ }
+
+ function writeBookedSlots(slots) {
+   const unique = [...new Set(slots)];
+   localStorage.setItem(BOOKED_SLOTS_KEY, JSON.stringify(unique));
+   try {
+     localStorage.setItem(`${BOOKED_SLOTS_KEY}_updated`, String(Date.now()));
+   } catch (_) { /* ignore */ }
+ }
+
+ function isSlotBooked(date, time) {
+   return readBookedSlots().includes(slotKey(date, time));
+ }
+
+ function markSlotBooked(date, time) {
+   const key = slotKey(date, time);
+   const slots = readBookedSlots();
+   if (!slots.includes(key)) {
+     slots.push(key);
+     writeBookedSlots(slots);
+   }
+ }
+
+ function parseLocalDate(value) {
+   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+   const [y, m, d] = value.split('-').map(Number);
+   return new Date(y, m - 1, d);
+ }
+
+ function isWeekendDate(dateValue) {
+   const date = parseLocalDate(dateValue);
+   if (!date) return false;
+   const day = date.getDay();
+   return day === 0 || day === 6;
+ }
+
+ function hourFromTime(time) {
+   const hour = Number(String(time).split(':')[0]);
+   return Number.isFinite(hour) ? hour : NaN;
+ }
+
+ function formatSlotLabel(time) {
+   const [h, m] = time.split(':').map(Number);
+   const date = new Date();
+   date.setHours(h, m, 0, 0);
+   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+ }
+
+ function todayIsoDate() {
+   const now = new Date();
+   const y = now.getFullYear();
+   const m = String(now.getMonth() + 1).padStart(2, '0');
+   const d = String(now.getDate()).padStart(2, '0');
+   return `${y}-${m}-${d}`;
+ }
+
+ function isWeekdayBlocked(dateValue, time) {
+   if (isWeekendDate(dateValue)) return false;
+   return hourFromTime(time) < WEEKDAY_OPEN_HOUR;
+ }
+
+ function isSlotAvailable(dateValue, time) {
+   if (!dateValue || !time) return false;
+   if (isSlotBooked(dateValue, time)) return false;
+   if (isWeekdayBlocked(dateValue, time)) return false;
+   return true;
+ }
 
  function setActiveServiceCard(value) {
    serviceCards.forEach(card => {
@@ -159,24 +253,93 @@
    });
  }
 
-  function updateBookingSteps() {
-    const hasService = !!bookingService.value;
-    const nameOk = !!document.getElementById('bookingName')?.value.trim();
-    const emailOk = !!document.getElementById('bookingEmail')?.value.trim();
-    const phoneOk = !!document.getElementById('bookingPhone')?.value.trim();
-    const addressOk = !!document.getElementById('bookingAddress')?.value.trim();
-    const hasDetails = nameOk && emailOk && phoneOk && addressOk;
-    const hasSchedule = !!document.getElementById('bookingDate')?.value && !!document.getElementById('bookingTime')?.value;
+ function updateBookingSteps() {
+   const hasService = !!bookingService.value;
+   const nameOk = !!document.getElementById('bookingName')?.value.trim();
+   const emailOk = !!document.getElementById('bookingEmail')?.value.trim();
+   const phoneOk = !!document.getElementById('bookingPhone')?.value.trim();
+   const idOk = CUSTOMER_ID_PATTERN.test((bookingIdInput?.value || '').trim());
+   const addressOk = !!document.getElementById('bookingAddress')?.value.trim();
+   const hasDetails = nameOk && emailOk && phoneOk && idOk && addressOk;
+   const hasSchedule = !!bookingDateInput?.value && !!bookingTimeInput?.value;
 
-    let current = 0;
-    if (hasService) current = 1;
-    if (hasService && hasDetails) current = 2;
+   let current = 0;
+   if (hasService) current = 1;
+   if (hasService && hasDetails) current = 2;
 
-    bookingSteps.forEach((step, index) => {
-      step.classList.toggle('active', index === current);
-      step.classList.toggle('done', index < current || (index === 2 && hasSchedule));
-    });
-  }
+   bookingSteps.forEach((step, index) => {
+     step.classList.toggle('active', index === current);
+     step.classList.toggle('done', index < current || (index === 2 && hasSchedule));
+   });
+ }
+
+ function renderBookingSlots() {
+   if (!bookingSlotsEl || !bookingDateInput || !bookingTimeInput) return;
+
+   const dateValue = bookingDateInput.value;
+   const selected = bookingTimeInput.value;
+   bookingSlotsEl.innerHTML = '';
+
+   if (!dateValue) {
+     if (bookingTimeHint) {
+       bookingTimeHint.textContent = 'Pick a date first. Weekdays open from 3:00 PM. Weekends: all times open.';
+     }
+     bookingTimeInput.value = '';
+     updateBookingSteps();
+     return;
+   }
+
+   const weekend = isWeekendDate(dateValue);
+   if (bookingTimeHint) {
+     bookingTimeHint.textContent = weekend
+       ? 'Weekend selected — all times are open unless already booked.'
+       : 'Weekday selected — times before 3:00 PM are unavailable. Available from 3:00 PM.';
+   }
+
+   TIME_SLOTS.forEach((time) => {
+     const button = document.createElement('button');
+     button.type = 'button';
+     button.className = 'booking-slot';
+     button.dataset.time = time;
+     button.setAttribute('role', 'option');
+
+     const booked = isSlotBooked(dateValue, time);
+     const weekdayBlocked = isWeekdayBlocked(dateValue, time);
+     const unavailable = booked || weekdayBlocked;
+
+     const label = document.createElement('span');
+     label.textContent = formatSlotLabel(time);
+     button.appendChild(label);
+
+     if (unavailable) {
+       button.disabled = true;
+       button.classList.add('is-unavailable');
+       button.setAttribute('aria-disabled', 'true');
+       const state = document.createElement('span');
+       state.className = 'slot-state';
+       state.textContent = booked ? 'Booked' : 'Unavailable';
+       button.appendChild(state);
+     } else {
+       button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
+       if (selected === time) button.classList.add('is-selected');
+       button.addEventListener('click', () => {
+         bookingTimeInput.value = time;
+         renderBookingSlots();
+         updateBookingSteps();
+       });
+     }
+
+     bookingSlotsEl.appendChild(button);
+   });
+
+   if (selected && !isSlotAvailable(dateValue, selected)) {
+     bookingTimeInput.value = '';
+     renderBookingSlots();
+     return;
+   }
+
+   updateBookingSteps();
+ }
 
  serviceCards.forEach(card => {
    card.addEventListener('click', () => {
@@ -187,14 +350,34 @@
    });
  });
 
- ['bookingName', 'bookingEmail', 'bookingPhone', 'bookingAddress', 'bookingDate', 'bookingTime'].forEach(id => {
+ ['bookingName', 'bookingEmail', 'bookingPhone', 'bookingId', 'bookingAddress'].forEach(id => {
    document.getElementById(id)?.addEventListener('input', updateBookingSteps);
+ });
+
+ bookingDateInput?.addEventListener('change', () => {
+   bookingTimeInput.value = '';
+   renderBookingSlots();
+ });
+ bookingDateInput?.addEventListener('input', () => {
+   bookingTimeInput.value = '';
+   renderBookingSlots();
+ });
+
+ window.addEventListener('storage', (event) => {
+   if (event.key === BOOKED_SLOTS_KEY || event.key === `${BOOKED_SLOTS_KEY}_updated`) {
+     renderBookingSlots();
+   }
  });
 
  function openBookingModal() {
    bookingModal.classList.add('open');
    bookingModal.setAttribute('aria-hidden', 'false');
    document.body.style.overflow = 'hidden';
+   if (bookingDateInput) {
+     bookingDateInput.min = todayIsoDate();
+     if (!bookingDateInput.value) bookingDateInput.value = todayIsoDate();
+   }
+   renderBookingSlots();
    bookingFormNote.textContent = "No payment required now. We'll confirm availability and pricing by email.";
    bookingFormNote.style.color = '';
  }
@@ -262,6 +445,7 @@
    const nameInput = document.getElementById('bookingName');
    const emailInput = document.getElementById('bookingEmail');
    const phoneInput = document.getElementById('bookingPhone');
+   const idInput = document.getElementById('bookingId');
    const addressInput = document.getElementById('bookingAddress');
    const dateInput = document.getElementById('bookingDate');
    const timeInput = document.getElementById('bookingTime');
@@ -286,6 +470,12 @@
      showBookingError('Please enter your phone number.', phoneInput);
      return;
    }
+   const customerId = (idInput?.value || '').trim().toUpperCase();
+   if (!CUSTOMER_ID_PATTERN.test(customerId)) {
+     showBookingError('Please enter a valid ID (example: 090290-373N).', idInput);
+     return;
+   }
+   idInput.value = customerId;
    if (!addressInput.value.trim()) {
      showBookingError('Please enter your address.', addressInput);
      return;
@@ -295,7 +485,17 @@
      return;
    }
    if (!timeInput.value) {
-     showBookingError('Please pick a preferred time.', timeInput);
+     showBookingError('Please pick an available time slot.', bookingSlotsEl);
+     return;
+   }
+   if (isWeekdayBlocked(dateInput.value, timeInput.value)) {
+     showBookingError('Weekday bookings are only available from 3:00 PM. Please choose another time.', bookingSlotsEl);
+     renderBookingSlots();
+     return;
+   }
+   if (isSlotBooked(dateInput.value, timeInput.value)) {
+     showBookingError('That time is already booked. Please choose another slot.', bookingSlotsEl);
+     renderBookingSlots();
      return;
    }
 
@@ -304,6 +504,8 @@
    const otherService = (formData.get('otherService') || '').trim();
    const serviceLabel = service === 'Other' ? (otherService || 'Other') : service;
    formData.set('service', serviceLabel);
+   formData.set('customerId', customerId);
+   formData.set('slotKey', slotKey(dateInput.value, timeInput.value));
    document.getElementById('bookingSubject').value = `ShineExpress Apartment Cleaning booking from ${formData.get('name')}`;
 
    const originalText = bookingSubmitBtn.textContent;
@@ -313,6 +515,13 @@
    bookingFormNote.style.color = '';
 
    try {
+     // Re-check right before send to reduce same-time double bookings
+     if (isSlotBooked(dateInput.value, timeInput.value)) {
+       showBookingError('That time was just booked. Please choose another slot.', bookingSlotsEl);
+       renderBookingSlots();
+       return;
+     }
+
      const response = await fetch(bookingForm.action, {
        method: 'POST',
        body: formData,
@@ -320,14 +529,17 @@
      });
 
      if (response.ok) {
+       markSlotBooked(dateInput.value, timeInput.value);
        closeBookingModal();
        bookingForm.reset();
+       bookingTimeInput.value = '';
        serviceCards.forEach(card => {
          card.classList.remove('active');
          card.setAttribute('aria-pressed', 'false');
        });
        otherServiceWrap.classList.add('hidden');
        otherServiceInput.required = false;
+       renderBookingSlots();
        updateBookingSteps();
        bookingFormNote.textContent = 'Booking sent! ShineExpress Apartment Cleaning will confirm your visit by email.';
        bookingFormNote.style.color = 'var(--ink)';
@@ -344,3 +556,6 @@
      bookingSubmitBtn.textContent = originalText;
    }
  }
+
+ if (bookingDateInput) bookingDateInput.min = todayIsoDate();
+ renderBookingSlots();
