@@ -358,6 +358,13 @@
          bookingTimeInput.value = time;
          renderBookingSlots();
          updateBookingSteps();
+         if (bookingEmergencyWrap) bookingEmergencyWrap.classList.remove('hidden');
+         if (bookingEmergencyInput) {
+           try { bookingEmergencyInput.focus({ preventScroll: true }); } catch (_) { bookingEmergencyInput.focus(); }
+           bookingEmergencyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         } else if (bookingEmergencyWrap) {
+           bookingEmergencyWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         }
        });
      } else {
        button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
