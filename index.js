@@ -312,7 +312,7 @@
    if (bookingTimeHint) {
      bookingTimeHint.textContent = weekend
        ? 'Weekend selected — all times are open unless already booked.'
-       : 'Weekday selected — all times are shown. Times before 3:00 PM are normally booked and require an emergency note if requested.';
+       : 'Times indicated Booked are already booked but can request with an emergency note.';
    }
 
    TIME_SLOTS.forEach((time) => {
