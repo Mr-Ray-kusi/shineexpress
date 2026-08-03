@@ -333,12 +333,22 @@
      state.className = 'slot-state';
 
      if (booked) {
-       button.disabled = true;
+       // visually show as unavailable but allow opening the emergency note
        button.classList.add('is-unavailable');
        button.setAttribute('aria-disabled', 'true');
        state.textContent = 'Booked';
        button.appendChild(state);
+       button.addEventListener('click', () => {
+         if (bookingEmergencyWrap) bookingEmergencyWrap.classList.remove('hidden');
+         if (bookingEmergencyInput) {
+           try { bookingEmergencyInput.focus({ preventScroll: true }); } catch (_) { bookingEmergencyInput.focus(); }
+           bookingEmergencyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         } else if (bookingEmergencyWrap) {
+           bookingEmergencyWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         }
+       });
      } else if (early) {
+
        button.classList.add('is-early-booked');
        button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
        if (selected === time) button.classList.add('is-selected');
