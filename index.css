@@ -1056,6 +1056,9 @@
     display:block;margin-top:.35rem;font-size:.72rem;font-weight:500;
     letter-spacing:0;text-transform:none;color:var(--text-mute);
   }
+  #emergencyRequestWrap{
+    transition:opacity .3s ease, max-height .3s ease;
+  }
   .booking-time-block{margin-bottom:1rem;}
   .booking-time-label{
     font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
@@ -1087,6 +1090,15 @@
     display:block;font-size:.65rem;font-weight:500;letter-spacing:.02em;
     text-transform:uppercase;text-decoration:none;margin-top:.2rem;opacity:.85;
   }
+  .booking-slot.is-early-booked{
+    border-color:#d4a017;
+    background:rgba(255,196,0,.12);
+    color:var(--ink);
+  }
+  .booking-slot.is-early-booked:hover:not(:disabled){
+    background:rgba(255,196,0,.18);
+  }
+  #emergencyRequestWrap.hidden{display:none;}
   @media (max-width:560px){
     .booking-slots{grid-template-columns:repeat(2,minmax(0,1fr));}
   }

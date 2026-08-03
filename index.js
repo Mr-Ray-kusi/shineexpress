@@ -145,6 +145,8 @@
  const bookingService = document.getElementById('bookingService');
  const otherServiceWrap = document.getElementById('otherServiceWrap');
  const otherServiceInput = document.getElementById('otherService');
+ const bookingEmergencyWrap = document.getElementById('emergencyRequestWrap');
+ const bookingEmergencyInput = document.getElementById('bookingEmergency');
  const serviceCards = document.querySelectorAll('.booking-service-card');
  const bookingSteps = document.querySelectorAll('.booking-step');
  const bookingServices = document.getElementById('bookingServices');
@@ -238,11 +240,27 @@
    return hourFromTime(time) < WEEKDAY_OPEN_HOUR;
  }
 
- function isSlotAvailable(dateValue, time) {
+ function isWeekdayEarlyRequest(dateValue, time) {
+   if (isWeekendDate(dateValue)) return false;
+   return hourFromTime(time) < WEEKDAY_OPEN_HOUR;
+ }
+
+ function isSlotSelectable(dateValue, time) {
    if (!dateValue || !time) return false;
    if (isSlotBooked(dateValue, time)) return false;
-   if (isWeekdayBlocked(dateValue, time)) return false;
    return true;
+ }
+
+ function isSlotAvailable(dateValue, time) {
+   return isSlotSelectable(dateValue, time);
+ }
+
+ function updateEmergencyRequestVisibility() {
+   if (!bookingEmergencyWrap || !bookingEmergencyInput || !bookingDateInput || !bookingTimeInput) return;
+   const early = isWeekdayEarlyRequest(bookingDateInput.value, bookingTimeInput.value) && bookingTimeInput.value;
+   bookingEmergencyWrap.classList.toggle('hidden', !early);
+   bookingEmergencyInput.required = early;
+   if (!early) bookingEmergencyInput.value = '';
  }
 
  function setActiveServiceCard(value) {
@@ -282,9 +300,10 @@
 
    if (!dateValue) {
      if (bookingTimeHint) {
-       bookingTimeHint.textContent = 'Pick a date first. Weekdays open from 3:00 PM. Weekends: all times open.';
+       bookingTimeHint.textContent = 'Pick a date first. Weekdays show all times, but before 3:00 PM are normally booked; weekends show all times.';
      }
      bookingTimeInput.value = '';
+     updateEmergencyRequestVisibility();
      updateBookingSteps();
      return;
    }
@@ -293,13 +312,10 @@
    if (bookingTimeHint) {
      bookingTimeHint.textContent = weekend
        ? 'Weekend selected — all times are open unless already booked.'
-       : 'Weekday selected — available from 3:00 PM.';
+       : 'Weekday selected — all times are shown. Times before 3:00 PM are normally booked and require an emergency note if requested.';
    }
 
    TIME_SLOTS.forEach((time) => {
-     // Hide weekday morning slots entirely (before 3:00 PM)
-     if (isWeekdayBlocked(dateValue, time)) return;
-
      const button = document.createElement('button');
      button.type = 'button';
      button.className = 'booking-slot';
@@ -307,19 +323,32 @@
      button.setAttribute('role', 'option');
 
      const booked = isSlotBooked(dateValue, time);
+     const early = isWeekdayEarlyRequest(dateValue, time);
 
      const label = document.createElement('span');
      label.textContent = formatSlotLabel(time);
      button.appendChild(label);
 
+     const state = document.createElement('span');
+     state.className = 'slot-state';
+
      if (booked) {
        button.disabled = true;
        button.classList.add('is-unavailable');
        button.setAttribute('aria-disabled', 'true');
-       const state = document.createElement('span');
-       state.className = 'slot-state';
        state.textContent = 'Booked';
        button.appendChild(state);
+     } else if (early) {
+       button.classList.add('is-early-booked');
+       button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
+       if (selected === time) button.classList.add('is-selected');
+       state.textContent = 'Booked — emergency request';
+       button.appendChild(state);
+       button.addEventListener('click', () => {
+         bookingTimeInput.value = time;
+         renderBookingSlots();
+         updateBookingSteps();
+       });
      } else {
        button.setAttribute('aria-selected', selected === time ? 'true' : 'false');
        if (selected === time) button.classList.add('is-selected');
@@ -333,12 +362,13 @@
      bookingSlotsEl.appendChild(button);
    });
 
-   if (selected && !isSlotAvailable(dateValue, selected)) {
+   if (selected && !isSlotSelectable(dateValue, selected)) {
      bookingTimeInput.value = '';
      renderBookingSlots();
      return;
    }
 
+   updateEmergencyRequestVisibility();
    updateBookingSteps();
  }
 
@@ -489,14 +519,15 @@
      showBookingError('Please pick an available time slot.', bookingSlotsEl);
      return;
    }
-   if (isWeekdayBlocked(dateInput.value, timeInput.value)) {
-     showBookingError('Weekday bookings are only available from 3:00 PM. Please choose another time.', bookingSlotsEl);
-     renderBookingSlots();
-     return;
-   }
    if (isSlotBooked(dateInput.value, timeInput.value)) {
      showBookingError('That time is already booked. Please choose another slot.', bookingSlotsEl);
      renderBookingSlots();
+     return;
+   }
+
+   const earlyRequest = isWeekdayEarlyRequest(dateInput.value, timeInput.value);
+   if (earlyRequest && !bookingEmergencyInput.value.trim()) {
+     showBookingError('Please explain why this booking needs a special slot before 3:00 PM.', bookingEmergencyInput);
      return;
    }
 
