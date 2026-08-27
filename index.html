@@ -495,7 +495,7 @@
         <p>Complete the form below. When you submit, your booking is sent directly to <strong>shineexpressfi@gmail.com</strong>.</p>
       </div>
       <form id="bookingForm" action="https://formspree.io/f/mykqogoq" method="POST" novalidate>
-        <input type="hidden" name="_subject" id="bookingSubject" value="ShineExpress Apartment Cleaning free quote request">
+        <input type="hidden" name="_subject" id="bookingSubject" value="NEW form submission on Shineexpress Apartment Cleaning Service">
         <p class="booking-section-title">Select a service</p>
         <div class="booking-services" id="bookingServices">
           <button type="button" class="booking-service-card" data-service="Move-out Cleaning" aria-pressed="false">
@@ -572,14 +572,9 @@
           </label>
           <div class="field-full booking-time-block">
             <p class="booking-time-label" id="bookingTimeLabel">Preferred time</p>
-            <p class="booking-time-hint" id="bookingTimeHint">Weekdays: available from 3:00 PM. Weekends: all times open.</p>
+            <p class="booking-time-hint" id="bookingTimeHint">Pick a date, then choose any available time.</p>
             <input type="hidden" id="bookingTime" name="time" required />
             <div class="booking-slots" id="bookingSlots" role="listbox" aria-labelledby="bookingTimeLabel"></div>
-          </div>
-          <div id="emergencyRequestWrap" class="field-full hidden">
-            <label for="bookingEmergency">Emergency booking details
-              <textarea id="bookingEmergency" name="emergencyRequest" placeholder="Explain why this booking needs a special slot before 3:00 PM"></textarea>
-            </label>
           </div>
         </div>
         <div class="form-actions">
@@ -593,6 +588,8 @@
 </div>
 
 </div>
+
+<div id="bookingToast" class="booking-toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
 <div class="float-contact" aria-label="Quick contact">
   <a class="float-btn float-call" href="tel:+358413258699" aria-label="Call ShineExpress Apartment Cleaning">

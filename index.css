@@ -1056,9 +1056,6 @@
     display:block;margin-top:.35rem;font-size:.72rem;font-weight:500;
     letter-spacing:0;text-transform:none;color:var(--text-mute);
   }
-  #emergencyRequestWrap{
-    transition:opacity .3s ease, max-height .3s ease;
-  }
   .booking-time-block{margin-bottom:1rem;}
   .booking-time-label{
     font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
@@ -1081,26 +1078,40 @@
   .booking-slot.is-selected{
     border-color:var(--ink);background:var(--ink);color:var(--lime);
   }
-  .booking-slot:disabled,
-  .booking-slot.is-unavailable{
-    cursor:not-allowed;opacity:.72;background:rgba(14,59,54,.06);
-    color:var(--text-mute);text-decoration:line-through;
-  }
-  .booking-slot .slot-state{
-    display:block;font-size:.65rem;font-weight:500;letter-spacing:.02em;
-    text-transform:uppercase;text-decoration:none;margin-top:.2rem;opacity:.85;
-  }
-  .booking-slot.is-early-booked{
-    border-color:#d4a017;
-    background:rgba(255,196,0,.12);
-    color:var(--ink);
-  }
-  .booking-slot.is-early-booked:hover:not(:disabled){
-    background:rgba(255,196,0,.18);
-  }
-  #emergencyRequestWrap.hidden{display:none;}
   @media (max-width:560px){
     .booking-slots{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  .booking-toast{
+    position:fixed;
+    left:50%;
+    bottom:max(24px, env(safe-area-inset-bottom, 0px));
+    transform:translateX(-50%) translateY(20px);
+    z-index:2147483646;
+    max-width:min(440px, calc(100vw - 32px));
+    padding:1rem 1.15rem;
+    border-radius:14px;
+    font-family:inherit;
+    font-size:.92rem;
+    font-weight:600;
+    line-height:1.45;
+    text-align:center;
+    box-shadow:0 18px 40px -16px rgba(0,0,0,.4);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .35s ease, transform .35s var(--ease);
+  }
+  .booking-toast.is-visible{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+  }
+  .booking-toast.is-success{
+    background:var(--ink);
+    color:var(--lime);
+  }
+  .booking-toast.is-error{
+    background:#8b1e1e;
+    color:#fff;
   }
   .booking-panel .modal-close{
     position:absolute;top:16px;right:16px;z-index:3;
